@@ -1,0 +1,63 @@
+---
+
+
+# -- [ app name ]
+- name: set app name facts
+  set_fact:
+    app_name: authtoken
+    app_data:
+      - { "username": admin, "password": redhat123 }
+
+
+
+- name: include post api 
+  include_tasks: ../helper/api-post.yml r_app_name={{ app_name }} r_app_data={{ app_data }} 
+
+
+# - debug: var=output_uri
+
+
+
+- name: "set api_tower {{app_name}} facts"
+  set_fact:
+    api_tower: >-
+       {%- set api_tower = api_tower | default({}) -%}
+
+       {%- if api_tower[app_name] is undefined -%}
+           {%- set _ignore = api_tower.update({
+              app_name: {},
+            }) -%}
+       {%- endif -%}
+       
+       {%- set _ignore = api_tower.update({
+            app_name: output_uri.results[0].json,
+            })
+       -%}
+       {{ api_tower }}
+
+
+
+- name: "set api_tower {{app_name}} facts"
+  set_fact:
+    api_tower: >-
+       {%- set api_tower = api_tower | default({}) -%}
+       
+       {%- set _ignore = api_tower.update({
+            "headers": {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Token ' + api_tower.authtoken.token,
+              },
+            })
+       -%}
+       {{ api_tower }}
+
+
+- debug: var=api_tower
+
+
+- name: include get api 
+  include_tasks: ../helper/api-get.yml r_app_name=ping
+
+
+- debug: var=api_tower

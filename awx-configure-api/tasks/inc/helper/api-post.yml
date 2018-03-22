@@ -1,0 +1,43 @@
+---
+
+- name: set app name facts
+  set_fact:
+    inner_context: "{{ r_app_context | default('dcim') }}"
+    inner_app_name: "{{ r_app_name }}"
+    inner_app_data: "{{ r_app_data | default({}) }}"
+    inner_app_method: "{{ r_app_method | default('POST') }}"
+
+
+
+- name: "set api_tower headers"
+  set_fact:
+    api_tower: >-
+       {%- set api_tower = api_tower | default({}) -%}
+
+       {%- if api_tower.headers is undefined -%}
+           {%- set _ignore = api_tower.update({
+              "headers": {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                },
+            }) -%}
+       {%- endif -%}
+       {{ api_tower }}
+
+
+
+
+- name: "create {{ inner_app_name }}"
+  uri:
+    url: "https://infra-tower.local.dc/api/v2/{{ inner_app_name }}/"
+    method: "{{ inner_app_method }}"
+    body: "{{ item }}"
+    # status_code: 201
+    body_format: json
+    headers: "{{ api_tower.headers }}"
+    validate_certs: False
+  register: output_uri
+  with_items:
+     - "{{ inner_app_data | unique }}"
+  # delegate_to: ipam-netbox.local.dc
+

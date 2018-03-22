@@ -1,0 +1,48 @@
+---
+
+# -- [ app name ]
+- name: set app name facts
+  set_fact:
+    inner_app_name: "{{ r_app_name }}"
+
+
+
+- name: "get {{ inner_app_name }} list"
+  uri:
+    # url: "{{ ipam_url }}/dcim/{{ inner_app_name }}/?name={{ inner_app_query }}"
+    url: "https://infra-tower.local.dc/api/v2/{{ inner_app_name }}/"
+    method: GET
+    return_content: yes
+    headers: "{{ api_tower.headers }}"
+    validate_certs: False
+  register: output_uri
+
+
+
+- name: "set api_tower {{inner_app_name}} facts"
+  set_fact:
+    api_tower: >-
+       {%- set api_tower = api_tower | default({}) -%}
+
+       {%- if api_tower[inner_app_name] is undefined -%}
+           {%- set _ignore = api_tower.update({
+              inner_app_name: {},
+            }) -%}
+       {%- endif -%}
+       
+       {%- set _ignore = api_tower.update({
+            inner_app_name: output_uri.json,
+            })
+       -%}
+       {{ api_tower }}
+
+
+
+
+
+
+
+
+
+
+

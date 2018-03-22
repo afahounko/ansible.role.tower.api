@@ -1,0 +1,9 @@
+---
+# tasks file for roles/awx-configure-api
+
+
+- name: authtoken
+  include_tasks: inc/authtoken/main.yml
+
+# - name: include platform
+#   include_tasks: inc/platform/main.yml

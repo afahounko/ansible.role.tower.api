@@ -1,0 +1,26 @@
+---
+
+- name: api for tower
+  hosts: all
+  roles:
+     - { role: awx-configure-api }
+  tags:
+    - awx
+
+
+  # vars:
+  #   cmd_json: 80
+  # tasks:
+
+  #   - uri: 
+  #       url: https://infra-tower.local.dc/api/v2/authtoken/
+  #       method: POST
+  #       body: {
+  #         "username": "admin",
+  #         "password": "redhat123" 
+  #       }
+  #       body_format: json
+  #       validate_certs: False
+  #     register: uri_output
+
+  #   - debug: var=uri_output
